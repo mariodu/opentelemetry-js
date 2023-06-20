@@ -341,28 +341,14 @@ export class FetchInstrumentation extends InstrumentationBase<
           try {
             const resClone = response.clone();
             const resClone4Hook = response.clone();
-            const body = resClone.body;
-            if (body) {
-              const reader = body.getReader();
-              const read = (): void => {
-                reader.read().then(
-                  ({ done }) => {
-                    if (done) {
-                      endSpanOnSuccess(span, resClone4Hook);
-                    } else {
-                      read();
-                    }
-                  },
-                  error => {
-                    endSpanOnError(span, error);
-                  }
-                );
-              };
-              read();
-            } else {
-              // some older browsers don't have .body implemented
-              endSpanOnSuccess(span, response);
-            }
+
+            resClone.arrayBuffer().then((buffer) => {
+              span.setAttribute(SemanticAttributes.HTTP_RESPONSE_CONTENT_LENGTH, buffer.byteLength);
+              endSpanOnSuccess(span, resClone4Hook);
+            }).catch((error) => {
+              span.setAttribute(SemanticAttributes.HTTP_RESPONSE_CONTENT_LENGTH, 0);
+              endSpanOnError(span, error);
+            });
           } finally {
             resolve(response);
           }
