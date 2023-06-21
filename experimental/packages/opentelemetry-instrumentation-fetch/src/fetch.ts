@@ -346,7 +346,7 @@ export class FetchInstrumentation extends InstrumentationBase<
               span.setAttribute(SemanticAttributes.HTTP_RESPONSE_CONTENT_LENGTH, buffer.byteLength);
               endSpanOnSuccess(span, resClone4Hook);
             }).catch((error) => {
-              span.setAttribute(SemanticAttributes.HTTP_RESPONSE_CONTENT_LENGTH, 0);
+              span.setAttribute(SemanticAttributes.HTTP_RESPONSE_CONTENT_LENGTH, -1);
               endSpanOnError(span, error);
             });
           } finally {
